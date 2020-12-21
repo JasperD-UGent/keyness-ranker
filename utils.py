@@ -29,6 +29,46 @@ def init_keyness_ranker(
         keyness_metric: str = "LogRatio",
         ranking_threshold: float = 0.5,
 ):
+    """Initialise the keyness ranker.
+    :param path_to_direc_corpora: $
+    :param subcorpora_sc: a tuple containing the (folder) names of the subcorpora which constitute the study corpus.
+    :param subcorpora_rc: a tuple containing the (folder) names of the subcorpora which constitute the reference corpus.
+    :param input_type_rc: data type of the corpus documents. Defaults to "3-column_delimited" for CSV/TSV files (which
+        is currently also the only recognised data type).
+    :param maintain_subcorpora_sc: when working with adjusted frequencies, boolean value which defines whether dispersion
+        is based on existing subcorpora of the study corpus, or whether all documents are merged and randomly split into
+        new subcorpora. Defaults to True.
+    :param maintain_subcorpora_rc: when working with adjusted frequencies, boolean value which defines whether dispersion
+        is based on existing subcorpora of the reference corpus, or whether all documents are merged and randomly split
+        into new subcorpora. Defaults to True.
+    :param mapping_custom_to_ud: if you work with custom POS tags, dictionary which maps custom tags to UD counterparts.
+    :param input_type_sc: data type of the corpus documents. Defaults to "3-column_delimited" for CSV/TSV files (which
+        is currently also the only recognised data type).
+    :param mapping_ud_to_custom: if you work with custom POS tags, dictionary which maps UD tags to custom counterparts.
+    :param desired_pos: tuple of UD tags which should be taken into account in the keyness calculations.
+        Defaults to ("NOUN", "ADJ", "VERB", "ADV").
+    :param lemma_or_token: defines whether to calculate frequencies on token or lemma level. CHOOSE BETWEEN: "lemma",
+        "token". Defaults to "lemma".
+    :param divide_number_docs_by: when working with adjusted frequencies, number by which the total number of documents
+        is divided to arrive at the number of new randomly generated subcorpora. Defaults to 10.
+    :param number_iterations_merge_subcorpora: when working with adjusted frequencies, number of times the subcorpora
+        are randomly shuffled to generate new subcorpora (and, thus, also new dispersion values). This will lead to
+        (slightly) different keyness values (and rankings), which are averaged out in the end. Defaults to 1.
+    :param approximation: float by which zero frequencies are approximated. Defaults to 0.000000000000000001.
+    :param statistical_significance_threshold_bic: statistical significance threshold for BIC values. Defaults to 2
+        (see also Gabrielatos [2018] and Wilson [2013]).
+    :param degrees_of_freedom: degrees of freedom used to calculate log likelihood values. Defaults to 1 (which is
+        the default number of degrees of freedom for keyness calculations).
+    :param frequency_type: frequency type based on which keyness values are calculated. CHOOSE BETWEEN: "abs_freq"
+        (absolute frequency), "adj_freq" (adjusted frequency), "abs_freq_Lapl" (absolute frequency + Laplace smoothing),
+        "adj_freq_Lapl" (adjusted frequency + Laplace smoothing). Defaults to "adj_freq_Lapl".
+    :param keyness_metric: keyness metric used to perform the keyness calculations. CHOOSE BETWEEN: "DIFF" (Gabrielatos
+        & Marchi, 2011), "Ratio" (Kilgarriff, 2009), "OddsRatio" (Everitt, 2002; Pojanapunya & Watson Todd, 2016),
+        "LogRatio" (Hardie, 2014), "DiffCoefficient" (Hofland & Johansson, 1982). Defaults to "LogRatio".
+    :param ranking_threshold: value between 0 and 1 which indicates in how many percent of the study corpus subcorpora -
+        reference corpus subcorpora combinations a statistically significant keyness value is required before the item
+        can enter into the keyness ranking. Defaults to 0.5.
+    """
     mapping_custom_to_ud = {"ADJ": "ADJ", "ADV": "ADV", "INTJ": "INTJ", "NOUN": "NOUN", "PROPN": "PROPN",
                             "VERB": "VERB", "ADP": "ADP", "AUX": "AUX", "CCONJ": "CCONJ", "DET": "DET", "NUM": "NUM",
                             "PART": "PART", "PRON": "PRON", "SCONJ": "SCONJ", "PUNCT": "PUNCT", "SYM": "SYM", "X": "X"} \
@@ -64,10 +104,10 @@ def init_keyness_ranker(
                 name_sc, input_type_sc, input_sc, maintain_subcorpora_sc, mapping_custom_to_ud,
                 mapping_ud_to_custom, desired_pos, lemma_or_token, divide_number_docs_by,
                 number_iterations_merge_subcorpora)
-            meta(name_sc, maintain_subcorpora_sc, desired_pos, lemma_or_token, divide_number_docs_by,
-                 number_iterations_merge_subcorpora)
             d_freq_abs_adj_sc, l_d_sum_abs_adj_sc = dispersion(
                 name_sc, desired_pos, d_freq_sc, l_d_freq_sum_cps_sc, number_iterations_merge_subcorpora)
+            meta(name_sc, maintain_subcorpora_sc, desired_pos, lemma_or_token, divide_number_docs_by,
+                 number_iterations_merge_subcorpora)
 
         if len(subcorpora_rc) > 1:
             name_rc = "_".join(subcorpora_rc)
@@ -89,10 +129,10 @@ def init_keyness_ranker(
                     name_rc, input_type_rc, input_rc, maintain_subcorpora_rc, mapping_custom_to_ud,
                     mapping_ud_to_custom, desired_pos, lemma_or_token, divide_number_docs_by,
                     number_iterations_merge_subcorpora)
-                meta(name_rc, maintain_subcorpora_rc, desired_pos, lemma_or_token, divide_number_docs_by,
-                     number_iterations_merge_subcorpora)
                 d_freq_abs_adj_rc, l_d_sum_abs_adj_rc = dispersion(
                     name_rc, desired_pos, d_freq_rc, l_d_freq_sum_cps_rc, number_iterations_merge_subcorpora)
+                meta(name_rc, maintain_subcorpora_rc, desired_pos, lemma_or_token, divide_number_docs_by,
+                     number_iterations_merge_subcorpora)
 
             l_d_keyn_corpus = keyness(
                 number_iterations_merge_subcorpora, approximation, statistical_significance_threshold_bic,
@@ -118,10 +158,10 @@ def init_keyness_ranker(
                     name_rc, input_type_rc, input_rc, maintain_subcorpora_rc, mapping_custom_to_ud,
                     mapping_ud_to_custom, desired_pos, lemma_or_token, divide_number_docs_by,
                     number_iterations_merge_subcorpora)
-                meta(name_rc, maintain_subcorpora_rc, desired_pos, lemma_or_token, divide_number_docs_by,
-                     number_iterations_merge_subcorpora)
                 d_freq_abs_adj_rc, l_d_sum_abs_adj_rc = dispersion(
                     name_rc, desired_pos, d_freq_rc, l_d_freq_sum_cps_rc, number_iterations_merge_subcorpora)
+                meta(name_rc, maintain_subcorpora_rc, desired_pos, lemma_or_token, divide_number_docs_by,
+                     number_iterations_merge_subcorpora)
 
             l_d_keyn_corpus = keyness(
                 number_iterations_merge_subcorpora, approximation, statistical_significance_threshold_bic,
@@ -210,10 +250,10 @@ def init_keyness_ranker(
                 name_sc, input_type_sc, input_sc, maintain_subcorpora_sc, mapping_custom_to_ud,
                 mapping_ud_to_custom, desired_pos, lemma_or_token, divide_number_docs_by,
                 number_iterations_merge_subcorpora)
-            meta(name_sc, maintain_subcorpora_sc, desired_pos, lemma_or_token, divide_number_docs_by,
-                 number_iterations_merge_subcorpora)
             d_freq_abs_adj_sc, l_d_sum_abs_adj_sc = dispersion(
                 name_sc, desired_pos, d_freq_sc, l_d_freq_sum_cps_sc, number_iterations_merge_subcorpora)
+            meta(name_sc, maintain_subcorpora_sc, desired_pos, lemma_or_token, divide_number_docs_by,
+                 number_iterations_merge_subcorpora)
 
         if len(subcorpora_rc) > 1:
             name_rc = "_".join(subcorpora_rc)
@@ -235,10 +275,10 @@ def init_keyness_ranker(
                     name_rc, input_type_rc, input_rc, maintain_subcorpora_rc, mapping_custom_to_ud,
                     mapping_ud_to_custom, desired_pos, lemma_or_token, divide_number_docs_by,
                     number_iterations_merge_subcorpora)
-                meta(name_rc, maintain_subcorpora_rc, desired_pos, lemma_or_token, divide_number_docs_by,
-                     number_iterations_merge_subcorpora)
                 d_freq_abs_adj_rc, l_d_sum_abs_adj_rc = dispersion(
                     name_rc, desired_pos, d_freq_rc, l_d_freq_sum_cps_rc, number_iterations_merge_subcorpora)
+                meta(name_rc, maintain_subcorpora_rc, desired_pos, lemma_or_token, divide_number_docs_by,
+                     number_iterations_merge_subcorpora)
 
             l_d_keyn_corpus = keyness(
                 number_iterations_merge_subcorpora, approximation, statistical_significance_threshold_bic,
@@ -264,10 +304,10 @@ def init_keyness_ranker(
                     name_rc, input_type_rc, input_rc, maintain_subcorpora_rc, mapping_custom_to_ud,
                     mapping_ud_to_custom, desired_pos, lemma_or_token, divide_number_docs_by,
                     number_iterations_merge_subcorpora)
-                meta(name_rc, maintain_subcorpora_rc, desired_pos, lemma_or_token, divide_number_docs_by,
-                     number_iterations_merge_subcorpora)
                 d_freq_abs_adj_rc, l_d_sum_abs_adj_rc = dispersion(
                     name_rc, desired_pos, d_freq_rc, l_d_freq_sum_cps_rc, number_iterations_merge_subcorpora)
+                meta(name_rc, maintain_subcorpora_rc, desired_pos, lemma_or_token, divide_number_docs_by,
+                     number_iterations_merge_subcorpora)
 
             l_d_keyn_corpus = keyness(
                 number_iterations_merge_subcorpora, approximation, statistical_significance_threshold_bic,

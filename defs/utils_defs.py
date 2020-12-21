@@ -658,15 +658,18 @@ def results_to_xlsx_per_sc(l_corpora_sc, l_corpora_rc, corpus_name_sc, lem_or_to
 
     # write final results into XLSX
 
-    if not os.path.isdir(os.path.join(output_direc)):
-        os.mkdir(output_direc)
+    if not os.path.isdir(os.path.join("output")):
+        os.mkdir("output")
+
+    if not os.path.isdir(os.path.join("output", output_direc)):
+        os.mkdir("output", output_direc)
 
     headers = [lem_or_tok, "POS", "number_values", "average_ranking_score", "average_keyness_score"]
 
     for corpus in d_keyn_per_corpus.keys():
         headers.append(corpus)
 
-    wb = xlsxwriter.Workbook(os.path.join(output_direc, fn_keyn + ".xlsx"))
+    wb = xlsxwriter.Workbook(os.path.join("output", output_direc, fn_keyn + ".xlsx"))
     ws1 = wb.add_worksheet("ranking_score_all")
     ws2 = wb.add_worksheet("keyness_all")
     ws3 = wb.add_worksheet("ranking_score_threshold")
