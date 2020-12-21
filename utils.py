@@ -30,7 +30,7 @@ def init_keyness_ranker(
         ranking_threshold: float = 0.5,
 ):
     """Initialise the keyness ranker.
-    :param path_to_direc_corpora: $
+    :param path_to_direc_corpora: path to the folder where the subcorpora are located.
     :param subcorpora_sc: a tuple containing the (folder) names of the subcorpora which constitute the study corpus.
     :param subcorpora_rc: a tuple containing the (folder) names of the subcorpora which constitute the reference corpus.
     :param input_type_rc: data type of the corpus documents. Defaults to "3-column_delimited" for CSV/TSV files (which
