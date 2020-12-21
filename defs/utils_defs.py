@@ -1,10 +1,8 @@
 import codecs
 import os
-import sys
 import json
 from ast import literal_eval
 import csv
-import sqlite3
 import copy
 import random
 import numpy as np
