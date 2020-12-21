@@ -1,5 +1,5 @@
 # keyness-ranker
-This module allows you to rank items in a study corpus according to their keyness (compared to a reference corpus). The keyness ranker takes 3-tuples consisting of a token, part-of-speech tag and lemma as input, meaning that you need to have your corpora tokenised, part-of-speech tagged an lemmatised beforehand. The tuples can be introduced into the keyness calculator as CSV or TSV files (one line per tuple; one file = one corpus document; one folder of files = one subcorpus; one folder of subcorpora = one corpus). Below you can find a concrete usage example and an overview of the main steps performed by the underlying script.
+This module allows you to rank items in a study corpus according to their keyness (compared to a reference corpus). The keyness ranker takes 3-tuples consisting of a token, part-of-speech tag and lemma as input, meaning that you need to have your corpora tokenised, part-of-speech tagged an lemmatised beforehand. The tuples can be introduced into the keyness ranker as CSV or TSV files (one line per tuple; one file = one corpus document; one folder of files = one subcorpus). The study and reference corpora are assembled based on the subcorpora (if your study/reference corpus consists of just a single subcorpus, you can just assign it this one subcorpus). Below you can find a concrete usage example and an overview of the main steps performed by the underlying script.
 
 
 **NOTE**: the example corpus used for the CSV/TSV input type is included in the <code>exampleCorpora</code> folder of this GitHub repository. This dummy corpus was created based on the [UD Spanish AnCora treebank](https://universaldependencies.org/treebanks/es_ancora/index.html). The treebank sentences were randomly divided over six documents, which were, at their turn, equally divided over three subcorpora (one subcorpora for the study corpus, and two for the reference corpus). The corpus adheres to the required folder structure: <code>corpus_folder/subcorpus_folders/document_files</code>.
@@ -28,6 +28,6 @@ Perform keyness calculation (see [keyness-calculator](https://github.com/JasperD
 ### Step_2
 Make a normalised keyness ranking. Only statistically significant keyness values are taken into consideration, and the final ranking is an average of all possible study corpus (both as a whole and for each individual subcorpus) - reference corpus comparisons (both as a whole and for each individual subcorpus).
 ## Required Python modules
-The keyness calculator uses the Python modules mentioned below, so you need to have them installed for the script to work.
+The keyness ranker uses the Python modules mentioned below, so you need to have them installed for the script to work.
 - [numpy](https://pypi.org/project/numpy/)
 - [Xlsxwriter](https://pypi.org/project/XlsxWriter/)
