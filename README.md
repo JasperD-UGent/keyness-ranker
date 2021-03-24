@@ -29,5 +29,5 @@ Perform keyness calculation (see [keyness-calculator](https://github.com/JasperD
 Make a normalised keyness ranking. Only statistically significant keyness values are taken into consideration, and the final ranking is an average of all possible study corpus (both as a whole and for each individual subcorpus) - reference corpus comparisons (both as a whole and for each individual subcorpus).
 ## Required Python modules
 The keyness ranker uses the Python modules mentioned below, so you need to have them installed for the script to work.
-- [numpy](https://pypi.org/project/numpy/)
-- [Xlsxwriter](https://pypi.org/project/XlsxWriter/)
+- [numpy](https://pypi.org/project/numpy/) (<=1.18.2)
+- [Xlsxwriter](https://pypi.org/project/XlsxWriter/) (<=1.2.8)
