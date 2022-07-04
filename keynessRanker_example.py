@@ -1,4 +1,4 @@
-from utils import init_keyness_ranker
+from keynessRanker_example_defs import init_keyness_ranker
 import numpy as np
 import os
 import random

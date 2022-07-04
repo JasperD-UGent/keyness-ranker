@@ -1,7 +1,6 @@
-from defs.utils_defs import check_meta
-from defs.utils_defs import load_json, load_json_str_to_obj
-from defs.utils_defs import corpora_to_d_freq, dispersion, keyness, meta
-from defs.utils_defs import results_to_xlsx_per_sc, results_to_xlsx_overview
+from utils.keynessRanking_support import check_meta, corpora_to_d_freq, dispersion, keyness, meta, \
+    results_to_xlsx_per_sc, results_to_xlsx_overview
+from utils.process_JSONs import load_json, load_json_str_to_obj
 from collections import OrderedDict
 import os
 from typing import Dict, Optional, Tuple
