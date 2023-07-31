@@ -12,6 +12,7 @@ def d_freq(
         corpus_name: str,
         input_type: str,
         d_input: Dict,
+        encoding_3_col_del: str,
         mapping_custom_to_ud: Dict,
         mapping_ud_to_custom: Dict,
         desired_pos: Tuple,
@@ -24,6 +25,7 @@ def d_freq(
     :param corpus_name: name of the corpus.
     :param input_type: data type of the corpus documents.
     :param d_input: provided input data for the corpus.
+    :param encoding_3_col_del: encoding of the corpus documents (when provided in 3-column format).
     :param mapping_custom_to_ud: if you work with custom POS tags, dictionary which maps custom tags to UD counterparts.
     :param mapping_ud_to_custom: if you work with custom POS tags, dictionary which maps UD tags to custom counterparts.
     :param desired_pos: tuple of UD tags which should be taken into account in the keyness calculations.
@@ -68,7 +70,9 @@ def d_freq(
                 else:
                     raise ValueError("Delimiter is not recognised.")
 
-                with open(os.path.join(d_input[subcorpus], doc), mode="r") as f_delimited:
+                with open(
+                        os.path.join(d_input[subcorpus], doc), mode="r", encoding=encoding_3_col_del
+                ) as f_delimited:
                     reader = csv.reader(f_delimited, delimiter=delim)
 
                     for row in reader:
@@ -335,6 +339,7 @@ def corpora_to_d_freq(
         corpus_name: str,
         input_type: str,
         d_input: Dict,
+        encoding_3_col_del: str,
         mapping_custom_to_ud: Dict,
         mapping_ud_to_custom: Dict,
         desired_pos: Tuple,
@@ -347,6 +352,7 @@ def corpora_to_d_freq(
     :param corpus_name: name of the corpus
     :param input_type: data type of the corpus documents.
     :param d_input: provided input data for the corpus.
+    :param encoding_3_col_del: encoding of the corpus documents (when provided in 3-column format).
     :param mapping_custom_to_ud: if you work with custom POS tags, dictionary which maps custom tags to UD counterparts.
     :param mapping_ud_to_custom: if you work with custom POS tags, dictionary which maps UD tags to custom counterparts.
     :param desired_pos: tuple of UD tags which should be taken into account in the keyness calculations.
@@ -362,8 +368,8 @@ def corpora_to_d_freq(
     sum of the words per corpus part.
     """
     d_freq_corpus, l_d_freq_cps, = d_freq(
-        corpus_name, input_type, d_input, mapping_custom_to_ud, mapping_ud_to_custom, desired_pos, lem_or_tok,
-        maintain_subcorpora, div_n_docs_by, n_iters
+        corpus_name, input_type, d_input, encoding_3_col_del, mapping_custom_to_ud, mapping_ud_to_custom, desired_pos,
+        lem_or_tok, maintain_subcorpora, div_n_docs_by, n_iters
     )
     l_d_freq_sum_cps = sum_words_desired_pos(
         corpus_name, d_freq_corpus, desired_pos, l_d_freq_cps, maintain_subcorpora, n_iters

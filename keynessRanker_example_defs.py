@@ -32,6 +32,7 @@ def init_keyness_ranker(
         frequency_type: str = "adj_freq_Lapl",
         keyness_metric: str = "LogRatio",
         ranking_threshold: float = 0.5,
+        encoding_3_col_del: str = "ansi"
 ) -> None:
     """Initialise the keyness ranker.
     :param path_to_direc_corpora: path to the folder where the subcorpora are located.
@@ -72,6 +73,7 @@ def init_keyness_ranker(
     :param ranking_threshold: value between 0 and 1 which indicates in how many percent of the study corpus subcorpora -
         reference corpus subcorpora combinations a statistically significant keyness value is required before the item
         can enter into the keyness ranking. Defaults to 0.5.
+    :param encoding_3_col_del: encoding of the corpus documents (when provided in 3-column format). Defaults to "ansi".
     :returns: `None`
     """
     l_pos_tags_ud = [
@@ -103,8 +105,9 @@ def init_keyness_ranker(
             )
         else:
             d_freq_sc, l_d_freq_sum_cps_sc = corpora_to_d_freq(
-                name_sc, input_type_sc, input_sc, mapping_custom_to_ud, mapping_ud_to_custom, desired_pos,
-                lemma_or_token, maintain_subcorpora_sc, divide_number_docs_by, number_iterations_merge_subcorpora
+                name_sc, input_type_sc, input_sc, encoding_3_col_del, mapping_custom_to_ud, mapping_ud_to_custom,
+                desired_pos, lemma_or_token, maintain_subcorpora_sc, divide_number_docs_by,
+                number_iterations_merge_subcorpora
             )
             d_freq_abs_adj_sc, l_d_sum_abs_adj_sc = dispersion(
                 name_sc, d_freq_sc, l_d_freq_sum_cps_sc, desired_pos, number_iterations_merge_subcorpora
@@ -131,8 +134,9 @@ def init_keyness_ranker(
                 )
             else:
                 d_freq_rc, l_d_freq_sum_cps_rc = corpora_to_d_freq(
-                    name_rc, input_type_rc, input_rc, mapping_custom_to_ud, mapping_ud_to_custom, desired_pos,
-                    lemma_or_token, maintain_subcorpora_rc, divide_number_docs_by, number_iterations_merge_subcorpora
+                    name_rc, input_type_rc, input_rc, encoding_3_col_del, mapping_custom_to_ud, mapping_ud_to_custom,
+                    desired_pos, lemma_or_token, maintain_subcorpora_rc, divide_number_docs_by,
+                    number_iterations_merge_subcorpora
                 )
                 d_freq_abs_adj_rc, l_d_sum_abs_adj_rc = dispersion(
                     name_rc, d_freq_rc, l_d_freq_sum_cps_rc, desired_pos, number_iterations_merge_subcorpora
@@ -166,8 +170,9 @@ def init_keyness_ranker(
                 )
             else:
                 d_freq_rc, l_d_freq_sum_cps_rc = corpora_to_d_freq(
-                    name_rc, input_type_rc, input_rc, mapping_custom_to_ud, mapping_ud_to_custom, desired_pos,
-                    lemma_or_token, maintain_subcorpora_rc, divide_number_docs_by, number_iterations_merge_subcorpora
+                    name_rc, input_type_rc, input_rc, encoding_3_col_del, mapping_custom_to_ud, mapping_ud_to_custom,
+                    desired_pos, lemma_or_token, maintain_subcorpora_rc, divide_number_docs_by,
+                    number_iterations_merge_subcorpora
                 )
                 d_freq_abs_adj_rc, l_d_sum_abs_adj_rc = dispersion(
                     name_rc, d_freq_rc, l_d_freq_sum_cps_rc, desired_pos, number_iterations_merge_subcorpora
@@ -262,8 +267,9 @@ def init_keyness_ranker(
             )
         else:
             d_freq_sc, l_d_freq_sum_cps_sc = corpora_to_d_freq(
-                name_sc, input_type_sc, input_sc, mapping_custom_to_ud, mapping_ud_to_custom, desired_pos,
-                lemma_or_token, maintain_subcorpora_sc, divide_number_docs_by, number_iterations_merge_subcorpora
+                name_sc, input_type_sc, input_sc, encoding_3_col_del, mapping_custom_to_ud, mapping_ud_to_custom,
+                desired_pos, lemma_or_token, maintain_subcorpora_sc, divide_number_docs_by,
+                number_iterations_merge_subcorpora
             )
             d_freq_abs_adj_sc, l_d_sum_abs_adj_sc = dispersion(
                 name_sc, d_freq_sc, l_d_freq_sum_cps_sc, desired_pos, number_iterations_merge_subcorpora
@@ -290,8 +296,9 @@ def init_keyness_ranker(
                 )
             else:
                 d_freq_rc, l_d_freq_sum_cps_rc = corpora_to_d_freq(
-                    name_rc, input_type_rc, input_rc, mapping_custom_to_ud, mapping_ud_to_custom, desired_pos,
-                    lemma_or_token, maintain_subcorpora_rc, divide_number_docs_by, number_iterations_merge_subcorpora
+                    name_rc, input_type_rc, input_rc, encoding_3_col_del, mapping_custom_to_ud, mapping_ud_to_custom,
+                    desired_pos, lemma_or_token, maintain_subcorpora_rc, divide_number_docs_by,
+                    number_iterations_merge_subcorpora
                 )
                 d_freq_abs_adj_rc, l_d_sum_abs_adj_rc = dispersion(
                     name_rc, d_freq_rc, l_d_freq_sum_cps_rc, desired_pos, number_iterations_merge_subcorpora
@@ -325,8 +332,9 @@ def init_keyness_ranker(
                 )
             else:
                 d_freq_rc, l_d_freq_sum_cps_rc = corpora_to_d_freq(
-                    name_rc, input_type_rc, input_rc, mapping_custom_to_ud, mapping_ud_to_custom, desired_pos,
-                    lemma_or_token, maintain_subcorpora_rc, divide_number_docs_by, number_iterations_merge_subcorpora
+                    name_rc, input_type_rc, input_rc, encoding_3_col_del, mapping_custom_to_ud, mapping_ud_to_custom,
+                    desired_pos, lemma_or_token, maintain_subcorpora_rc, divide_number_docs_by,
+                    number_iterations_merge_subcorpora
                 )
                 d_freq_abs_adj_rc, l_d_sum_abs_adj_rc = dispersion(
                     name_rc, d_freq_rc, l_d_freq_sum_cps_rc, desired_pos, number_iterations_merge_subcorpora
