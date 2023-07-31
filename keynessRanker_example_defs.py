@@ -1,8 +1,13 @@
-from utils.keynessRanking_support import check_meta, corpora_to_d_freq, dispersion, keyness, meta, \
-    results_to_xlsx_per_sc, results_to_xlsx_overview
+from utils.STEP_1 import corpora_to_d_freq
+from utils.STEP_2 import dispersion
+from utils.STEP_3 import keyness
+from utils.STEP_4 import meta
+from utils.keynessRanker_support import check_meta
 from utils.process_JSONs import load_json, load_json_str_to_obj
+from utils.write_output import results_to_xlsx_per_sc, results_to_xlsx_overview
 from collections import OrderedDict
 import os
+import sys
 from typing import Dict, Optional, Tuple
 
 
@@ -27,26 +32,26 @@ def init_keyness_ranker(
         frequency_type: str = "adj_freq_Lapl",
         keyness_metric: str = "LogRatio",
         ranking_threshold: float = 0.5,
-):
+) -> None:
     """Initialise the keyness ranker.
     :param path_to_direc_corpora: path to the folder where the subcorpora are located.
     :param subcorpora_sc: a tuple containing the (folder) names of the subcorpora which constitute the study corpus.
     :param subcorpora_rc: a tuple containing the (folder) names of the subcorpora which constitute the reference corpus.
-    :param input_type_rc: data type of the corpus documents. Defaults to "3-column_delimited" for CSV/TSV files (which
-        is currently also the only recognised data type).
-    :param maintain_subcorpora_sc: when working with adjusted frequencies, boolean value which defines whether dispersion
-        is based on existing subcorpora of the study corpus, or whether all documents are merged and randomly split into
-        new subcorpora. Defaults to True.
-    :param maintain_subcorpora_rc: when working with adjusted frequencies, boolean value which defines whether dispersion
-        is based on existing subcorpora of the reference corpus, or whether all documents are merged and randomly split
-        into new subcorpora. Defaults to True.
+    :param input_type_sc: data type of the study corpus documents. Defaults to "3-column_delimited" for CSV/TSV files
+        (which is currently also the only recognised data type).
+    :param input_type_rc: data type of the reference corpus documents. Defaults to "3-column_delimited" for CSV/TSV
+        files (which is currently also the only recognised data type).
+    :param maintain_subcorpora_sc: when working with adjusted frequencies, boolean value which defines whether
+        dispersion is based on existing subcorpora of the study corpus, or whether all documents are merged and randomly
+        split into new subcorpora. Defaults to True.
+    :param maintain_subcorpora_rc: when working with adjusted frequencies, boolean value which defines whether
+        dispersion is based on existing subcorpora of the reference corpus, or whether all documents are merged and
+        randomly split into new subcorpora. Defaults to True.
     :param mapping_custom_to_ud: if you work with custom POS tags, dictionary which maps custom tags to UD counterparts.
-    :param input_type_sc: data type of the corpus documents. Defaults to "3-column_delimited" for CSV/TSV files (which
-        is currently also the only recognised data type).
     :param mapping_ud_to_custom: if you work with custom POS tags, dictionary which maps UD tags to custom counterparts.
     :param desired_pos: tuple of UD tags which should be taken into account in the keyness calculations.
         Defaults to ("NOUN", "ADJ", "VERB", "ADV").
-    :param lemma_or_token: defines whether to calculate frequencies on token or lemma level. CHOOSE BETWEEN: "lemma",
+    :param lemma_or_token: defines whether to calculate frequencies on token or lemma level. Choose between: "lemma",
         "token". Defaults to "lemma".
     :param divide_number_docs_by: when working with adjusted frequencies, number by which the total number of documents
         is divided to arrive at the number of new randomly generated subcorpora. Defaults to 10.
@@ -58,25 +63,24 @@ def init_keyness_ranker(
         (see also Gabrielatos [2018] and Wilson [2013]).
     :param degrees_of_freedom: degrees of freedom used to calculate log likelihood values. Defaults to 1 (which is
         the default number of degrees of freedom for keyness calculations).
-    :param frequency_type: frequency type based on which keyness values are calculated. CHOOSE BETWEEN: "abs_freq"
+    :param frequency_type: frequency type based on which keyness values are calculated. Choose between: "abs_freq"
         (absolute frequency), "adj_freq" (adjusted frequency), "abs_freq_Lapl" (absolute frequency + Laplace smoothing),
         "adj_freq_Lapl" (adjusted frequency + Laplace smoothing). Defaults to "adj_freq_Lapl".
-    :param keyness_metric: keyness metric used to perform the keyness calculations. CHOOSE BETWEEN: "DIFF" (Gabrielatos
+    :param keyness_metric: keyness metric used to perform the keyness calculations. Choose between: "DIFF" (Gabrielatos
         & Marchi, 2011), "Ratio" (Kilgarriff, 2009), "OddsRatio" (Everitt, 2002; Pojanapunya & Watson Todd, 2016),
         "LogRatio" (Hardie, 2014), "DiffCoefficient" (Hofland & Johansson, 1982). Defaults to "LogRatio".
     :param ranking_threshold: value between 0 and 1 which indicates in how many percent of the study corpus subcorpora -
         reference corpus subcorpora combinations a statistically significant keyness value is required before the item
         can enter into the keyness ranking. Defaults to 0.5.
+    :returns: `None`
     """
-    mapping_custom_to_ud = {
-        "ADJ": "ADJ", "ADV": "ADV", "INTJ": "INTJ", "NOUN": "NOUN", "PROPN": "PROPN", "VERB": "VERB", "ADP": "ADP",
-        "AUX": "AUX", "CCONJ": "CCONJ", "DET": "DET", "NUM": "NUM", "PART": "PART", "PRON": "PRON", "SCONJ": "SCONJ",
-        "PUNCT": "PUNCT", "SYM": "SYM", "X": "X"
-    } if mapping_custom_to_ud is None else mapping_custom_to_ud
+    l_pos_tags_ud = [
+        "ADJ", "ADV", "INTJ", "NOUN", "PROPN", "VERB", "ADP", "AUX", "CCONJ", "DET", "NUM", "PART", "PRON", "SCONJ",
+        "PUNCT", "SYM", "X"
+    ]
+    mapping_custom_to_ud = {pos: pos for pos in l_pos_tags_ud} if mapping_custom_to_ud is None else mapping_custom_to_ud
     mapping_ud_to_custom = {
-        "ADJ": ["ADJ"], "ADV": ["ADV"], "INTJ": ["INTJ"], "NOUN": ["NOUN"], "PROPN": ["PROPN"], "VERB": ["VERB"],
-        "ADP": ["ADP"], "AUX": ["AUX"], "CCONJ": ["CCONJ"], "DET": ["DET"], "NUM": ["NUM"], "PART": ["PART"],
-        "PRON": ["PRON"], "SCONJ": ["SCONJ"], "PUNCT": ["PUNCT"], "SYM": ["SYM"], "X": ["X"]
+        pos: [pos] for pos in l_pos_tags_ud
     } if mapping_ud_to_custom is None else mapping_ud_to_custom
     number_iterations_merge_subcorpora = 1 if maintain_subcorpora_sc and maintain_subcorpora_rc \
         else number_iterations_merge_subcorpora
@@ -86,112 +90,98 @@ def init_keyness_ranker(
     if len(subcorpora_sc) > 1:
         d_keyn_per_rc = OrderedDict()
         name_sc = "_".join(subcorpora_sc)
-        input_sc = {}
-
-        for corpus in subcorpora_sc:
-            input_sc[corpus] = os.path.join(path_to_direc_corpora, corpus)
-
+        input_sc = {corpus: os.path.join(path_to_direc_corpora, corpus) for corpus in subcorpora_sc}
         load_from_files_sc = check_meta(
-            name_sc, maintain_subcorpora_sc, desired_pos, lemma_or_token, divide_number_docs_by,
+            name_sc, desired_pos, lemma_or_token, maintain_subcorpora_sc, divide_number_docs_by,
             number_iterations_merge_subcorpora
         )
 
         if load_from_files_sc:
-            d_freq_abs_adj_sc = load_json_str_to_obj(os.path.join("prep", name_sc, name_sc + "_d_freq_abs_adj.json"))
+            d_freq_abs_adj_sc = load_json_str_to_obj(os.path.join("prep", name_sc, f"{name_sc}_d_freq_abs_adj.json"))
             l_d_sum_abs_adj_sc = load_json(
-                os.path.join("prep", name_sc, name_sc + "_sum_words_desired_POS_abs_adj.json")
+                os.path.join("prep", name_sc, f"{name_sc}_sum_words_desired_POS_abs_adj.json")
             )
         else:
             d_freq_sc, l_d_freq_sum_cps_sc = corpora_to_d_freq(
-                name_sc, input_type_sc, input_sc, maintain_subcorpora_sc, mapping_custom_to_ud,
-                mapping_ud_to_custom, desired_pos, lemma_or_token, divide_number_docs_by,
-                number_iterations_merge_subcorpora
+                name_sc, input_type_sc, input_sc, mapping_custom_to_ud, mapping_ud_to_custom, desired_pos,
+                lemma_or_token, maintain_subcorpora_sc, divide_number_docs_by, number_iterations_merge_subcorpora
             )
             d_freq_abs_adj_sc, l_d_sum_abs_adj_sc = dispersion(
-                name_sc, desired_pos, d_freq_sc, l_d_freq_sum_cps_sc, number_iterations_merge_subcorpora
+                name_sc, d_freq_sc, l_d_freq_sum_cps_sc, desired_pos, number_iterations_merge_subcorpora
             )
             meta(
-                name_sc, maintain_subcorpora_sc, desired_pos, lemma_or_token, divide_number_docs_by,
+                name_sc, desired_pos, lemma_or_token, maintain_subcorpora_sc, divide_number_docs_by,
                 number_iterations_merge_subcorpora
             )
 
         if len(subcorpora_rc) > 1:
             name_rc = "_".join(subcorpora_rc)
-            input_rc = {}
-
-            for corpus in subcorpora_rc:
-                input_rc[corpus] = os.path.join(path_to_direc_corpora, corpus)
-
+            input_rc = {corpus: os.path.join(path_to_direc_corpora, corpus) for corpus in subcorpora_rc}
             load_from_files_rc = check_meta(
-                name_rc, maintain_subcorpora_rc, desired_pos, lemma_or_token, divide_number_docs_by,
+                name_rc, desired_pos, lemma_or_token, maintain_subcorpora_rc, divide_number_docs_by,
                 number_iterations_merge_subcorpora
             )
 
             if load_from_files_rc:
                 d_freq_abs_adj_rc = load_json_str_to_obj(
-                    os.path.join("prep", name_rc, name_rc + "_d_freq_abs_adj.json")
+                    os.path.join("prep", name_rc, f"{name_rc}_d_freq_abs_adj.json")
                 )
                 l_d_sum_abs_adj_rc = load_json(
-                    os.path.join("prep", name_rc, name_rc + "_sum_words_desired_POS_abs_adj.json")
+                    os.path.join("prep", name_rc, f"{name_rc}_sum_words_desired_POS_abs_adj.json")
                 )
             else:
                 d_freq_rc, l_d_freq_sum_cps_rc = corpora_to_d_freq(
-                    name_rc, input_type_rc, input_rc, maintain_subcorpora_rc, mapping_custom_to_ud,
-                    mapping_ud_to_custom, desired_pos, lemma_or_token, divide_number_docs_by,
-                    number_iterations_merge_subcorpora
+                    name_rc, input_type_rc, input_rc, mapping_custom_to_ud, mapping_ud_to_custom, desired_pos,
+                    lemma_or_token, maintain_subcorpora_rc, divide_number_docs_by, number_iterations_merge_subcorpora
                 )
                 d_freq_abs_adj_rc, l_d_sum_abs_adj_rc = dispersion(
-                    name_rc, desired_pos, d_freq_rc, l_d_freq_sum_cps_rc, number_iterations_merge_subcorpora
+                    name_rc, d_freq_rc, l_d_freq_sum_cps_rc, desired_pos, number_iterations_merge_subcorpora
                 )
                 meta(
-                    name_rc, maintain_subcorpora_rc, desired_pos, lemma_or_token, divide_number_docs_by,
+                    name_rc, desired_pos, lemma_or_token, maintain_subcorpora_rc, divide_number_docs_by,
                     number_iterations_merge_subcorpora
                 )
 
             l_d_keyn_corpus = keyness(
-                number_iterations_merge_subcorpora, approximation, statistical_significance_threshold_bic,
-                degrees_of_freedom, frequency_type, keyness_metric, d_freq_abs_adj_sc, l_d_sum_abs_adj_sc,
+                approximation, statistical_significance_threshold_bic, degrees_of_freedom, frequency_type,
+                keyness_metric, number_iterations_merge_subcorpora, d_freq_abs_adj_sc, l_d_sum_abs_adj_sc,
                 d_freq_abs_adj_rc, l_d_sum_abs_adj_rc
             )
-
             d_keyn_per_rc[name_rc] = l_d_keyn_corpus
 
         for corpus in subcorpora_rc:
             name_rc = corpus
             input_rc = {corpus: os.path.join(path_to_direc_corpora, corpus)}
-
             load_from_files_rc = check_meta(
-                name_rc, maintain_subcorpora_rc, desired_pos, lemma_or_token, divide_number_docs_by,
+                name_rc, desired_pos, lemma_or_token, maintain_subcorpora_rc, divide_number_docs_by,
                 number_iterations_merge_subcorpora
             )
 
             if load_from_files_rc:
                 d_freq_abs_adj_rc = load_json_str_to_obj(
-                    os.path.join("prep", name_rc, name_rc + "_d_freq_abs_adj.json")
+                    os.path.join("prep", name_rc, f"{name_rc}_d_freq_abs_adj.json")
                 )
                 l_d_sum_abs_adj_rc = load_json(
-                    os.path.join("prep", name_rc, name_rc + "_sum_words_desired_POS_abs_adj.json")
+                    os.path.join("prep", name_rc, f"{name_rc}_sum_words_desired_POS_abs_adj.json")
                 )
             else:
                 d_freq_rc, l_d_freq_sum_cps_rc = corpora_to_d_freq(
-                    name_rc, input_type_rc, input_rc, maintain_subcorpora_rc, mapping_custom_to_ud,
-                    mapping_ud_to_custom, desired_pos, lemma_or_token, divide_number_docs_by,
-                    number_iterations_merge_subcorpora
+                    name_rc, input_type_rc, input_rc, mapping_custom_to_ud, mapping_ud_to_custom, desired_pos,
+                    lemma_or_token, maintain_subcorpora_rc, divide_number_docs_by, number_iterations_merge_subcorpora
                 )
                 d_freq_abs_adj_rc, l_d_sum_abs_adj_rc = dispersion(
-                    name_rc, desired_pos, d_freq_rc, l_d_freq_sum_cps_rc, number_iterations_merge_subcorpora
+                    name_rc, d_freq_rc, l_d_freq_sum_cps_rc, desired_pos, number_iterations_merge_subcorpora
                 )
                 meta(
-                    name_rc, maintain_subcorpora_rc, desired_pos, lemma_or_token, divide_number_docs_by,
+                    name_rc, desired_pos, lemma_or_token, maintain_subcorpora_rc, divide_number_docs_by,
                     number_iterations_merge_subcorpora
                 )
 
             l_d_keyn_corpus = keyness(
-                number_iterations_merge_subcorpora, approximation, statistical_significance_threshold_bic,
-                degrees_of_freedom, frequency_type, keyness_metric, d_freq_abs_adj_sc, l_d_sum_abs_adj_sc,
+                approximation, statistical_significance_threshold_bic, degrees_of_freedom, frequency_type,
+                keyness_metric, number_iterations_merge_subcorpora, d_freq_abs_adj_sc, l_d_sum_abs_adj_sc,
                 d_freq_abs_adj_rc, l_d_sum_abs_adj_rc
             )
-
             d_keyn_per_rc[name_rc] = l_d_keyn_corpus
 
         d_keyn_sc = OrderedDict()
@@ -250,120 +240,107 @@ def init_keyness_ranker(
             key=lambda i: i["item"]),
             key=lambda i: i["ranking_score_avg"], reverse=True
         )  # sort key items by 1) ranking_score_avg (descending); 2) pos_lem_or_tok (ascending)
-
         results_to_xlsx_per_sc(
-            subcorpora_sc, subcorpora_rc, name_sc, lemma_or_token, keyness_metric, frequency_type, ranking_threshold,
-            sorted_l_d_keyn, d_keyn_per_rc, maintain_subcorpora_sc, maintain_subcorpora_rc
+            subcorpora_sc, subcorpora_rc, name_sc, maintain_subcorpora_sc, maintain_subcorpora_rc, lemma_or_token,
+            frequency_type, keyness_metric, ranking_threshold, sorted_l_d_keyn, d_keyn_per_rc
         )
-
         d_keyn_overview[name_sc] = sorted_l_d_keyn
 
     for study_corpus in subcorpora_sc:
         name_sc = study_corpus
         d_keyn_per_rc = OrderedDict()
         input_sc = {study_corpus: os.path.join(path_to_direc_corpora, study_corpus)}
-
         load_from_files_sc = check_meta(
-            name_sc, maintain_subcorpora_sc, desired_pos, lemma_or_token, divide_number_docs_by,
+            name_sc, desired_pos, lemma_or_token, maintain_subcorpora_sc, divide_number_docs_by,
             number_iterations_merge_subcorpora
         )
 
         if load_from_files_sc:
-            d_freq_abs_adj_sc = load_json_str_to_obj(os.path.join("prep", name_sc, name_sc + "_d_freq_abs_adj.json"))
+            d_freq_abs_adj_sc = load_json_str_to_obj(os.path.join("prep", name_sc, f"{name_sc}_d_freq_abs_adj.json"))
             l_d_sum_abs_adj_sc = load_json(
-                os.path.join("prep", name_sc, name_sc + "_sum_words_desired_POS_abs_adj.json")
+                os.path.join("prep", name_sc, f"{name_sc}_sum_words_desired_POS_abs_adj.json")
             )
         else:
             d_freq_sc, l_d_freq_sum_cps_sc = corpora_to_d_freq(
-                name_sc, input_type_sc, input_sc, maintain_subcorpora_sc, mapping_custom_to_ud,
-                mapping_ud_to_custom, desired_pos, lemma_or_token, divide_number_docs_by,
-                number_iterations_merge_subcorpora
+                name_sc, input_type_sc, input_sc, mapping_custom_to_ud, mapping_ud_to_custom, desired_pos,
+                lemma_or_token, maintain_subcorpora_sc, divide_number_docs_by, number_iterations_merge_subcorpora
             )
             d_freq_abs_adj_sc, l_d_sum_abs_adj_sc = dispersion(
-                name_sc, desired_pos, d_freq_sc, l_d_freq_sum_cps_sc, number_iterations_merge_subcorpora
+                name_sc, d_freq_sc, l_d_freq_sum_cps_sc, desired_pos, number_iterations_merge_subcorpora
             )
             meta(
-                name_sc, maintain_subcorpora_sc, desired_pos, lemma_or_token, divide_number_docs_by,
+                name_sc, desired_pos, lemma_or_token, maintain_subcorpora_sc, divide_number_docs_by,
                 number_iterations_merge_subcorpora
             )
 
         if len(subcorpora_rc) > 1:
             name_rc = "_".join(subcorpora_rc)
-            input_rc = {}
-
-            for corpus in subcorpora_rc:
-                input_rc[corpus] = os.path.join(path_to_direc_corpora, corpus)
-
+            input_rc = {corpus: os.path.join(path_to_direc_corpora, corpus) for corpus in subcorpora_rc}
             load_from_files_rc = check_meta(
-                name_rc, maintain_subcorpora_rc, desired_pos, lemma_or_token, divide_number_docs_by,
+                name_rc, desired_pos, lemma_or_token, maintain_subcorpora_rc, divide_number_docs_by,
                 number_iterations_merge_subcorpora
             )
 
             if load_from_files_rc:
                 d_freq_abs_adj_rc = load_json_str_to_obj(
-                    os.path.join("prep", name_rc, name_rc + "_d_freq_abs_adj.json")
+                    os.path.join("prep", name_rc, f"{name_rc}_d_freq_abs_adj.json")
                 )
                 l_d_sum_abs_adj_rc = load_json(
-                    os.path.join("prep", name_rc, name_rc + "_sum_words_desired_POS_abs_adj.json")
+                    os.path.join("prep", name_rc, f"{name_rc}_sum_words_desired_POS_abs_adj.json")
                 )
             else:
                 d_freq_rc, l_d_freq_sum_cps_rc = corpora_to_d_freq(
-                    name_rc, input_type_rc, input_rc, maintain_subcorpora_rc, mapping_custom_to_ud,
-                    mapping_ud_to_custom, desired_pos, lemma_or_token, divide_number_docs_by,
-                    number_iterations_merge_subcorpora
+                    name_rc, input_type_rc, input_rc, mapping_custom_to_ud, mapping_ud_to_custom, desired_pos,
+                    lemma_or_token, maintain_subcorpora_rc, divide_number_docs_by, number_iterations_merge_subcorpora
                 )
                 d_freq_abs_adj_rc, l_d_sum_abs_adj_rc = dispersion(
-                    name_rc, desired_pos, d_freq_rc, l_d_freq_sum_cps_rc, number_iterations_merge_subcorpora
+                    name_rc, d_freq_rc, l_d_freq_sum_cps_rc, desired_pos, number_iterations_merge_subcorpora
                 )
                 meta(
-                    name_rc, maintain_subcorpora_rc, desired_pos, lemma_or_token, divide_number_docs_by,
+                    name_rc, desired_pos, lemma_or_token, maintain_subcorpora_rc, divide_number_docs_by,
                     number_iterations_merge_subcorpora
                 )
 
             l_d_keyn_corpus = keyness(
-                number_iterations_merge_subcorpora, approximation, statistical_significance_threshold_bic,
-                degrees_of_freedom, frequency_type, keyness_metric, d_freq_abs_adj_sc, l_d_sum_abs_adj_sc,
+                approximation, statistical_significance_threshold_bic, degrees_of_freedom, frequency_type,
+                keyness_metric, number_iterations_merge_subcorpora, d_freq_abs_adj_sc, l_d_sum_abs_adj_sc,
                 d_freq_abs_adj_rc, l_d_sum_abs_adj_rc
             )
-
             d_keyn_per_rc[name_rc] = l_d_keyn_corpus
 
         for corpus in subcorpora_rc:
             name_rc = corpus
             input_rc = {corpus: os.path.join(path_to_direc_corpora, corpus)}
-
             load_from_files_rc = check_meta(
-                name_rc, maintain_subcorpora_rc, desired_pos, lemma_or_token, divide_number_docs_by,
+                name_rc, desired_pos, lemma_or_token, maintain_subcorpora_rc, divide_number_docs_by,
                 number_iterations_merge_subcorpora
             )
 
             if load_from_files_rc:
                 d_freq_abs_adj_rc = load_json_str_to_obj(
-                    os.path.join("prep", name_rc, name_rc + "_d_freq_abs_adj.json")
+                    os.path.join("prep", name_rc, f"{name_rc}_d_freq_abs_adj.json")
                 )
                 l_d_sum_abs_adj_rc = load_json(
-                    os.path.join("prep", name_rc, name_rc + "_sum_words_desired_POS_abs_adj.json")
+                    os.path.join("prep", name_rc, f"{name_rc}_sum_words_desired_POS_abs_adj.json")
                 )
             else:
                 d_freq_rc, l_d_freq_sum_cps_rc = corpora_to_d_freq(
-                    name_rc, input_type_rc, input_rc, maintain_subcorpora_rc, mapping_custom_to_ud,
-                    mapping_ud_to_custom, desired_pos, lemma_or_token, divide_number_docs_by,
-                    number_iterations_merge_subcorpora
+                    name_rc, input_type_rc, input_rc, mapping_custom_to_ud, mapping_ud_to_custom, desired_pos,
+                    lemma_or_token, maintain_subcorpora_rc, divide_number_docs_by, number_iterations_merge_subcorpora
                 )
                 d_freq_abs_adj_rc, l_d_sum_abs_adj_rc = dispersion(
-                    name_rc, desired_pos, d_freq_rc, l_d_freq_sum_cps_rc, number_iterations_merge_subcorpora
+                    name_rc, d_freq_rc, l_d_freq_sum_cps_rc, desired_pos, number_iterations_merge_subcorpora
                 )
                 meta(
-                    name_rc, maintain_subcorpora_rc, desired_pos, lemma_or_token, divide_number_docs_by,
+                    name_rc, desired_pos, lemma_or_token, maintain_subcorpora_rc, divide_number_docs_by,
                     number_iterations_merge_subcorpora
                 )
 
             l_d_keyn_corpus = keyness(
-                number_iterations_merge_subcorpora, approximation, statistical_significance_threshold_bic,
-                degrees_of_freedom, frequency_type, keyness_metric, d_freq_abs_adj_sc, l_d_sum_abs_adj_sc,
+                approximation, statistical_significance_threshold_bic, degrees_of_freedom, frequency_type,
+                keyness_metric, number_iterations_merge_subcorpora, d_freq_abs_adj_sc, l_d_sum_abs_adj_sc,
                 d_freq_abs_adj_rc, l_d_sum_abs_adj_rc
             )
-
             d_keyn_per_rc[name_rc] = l_d_keyn_corpus
 
         d_keyn_sc = OrderedDict()
@@ -422,12 +399,10 @@ def init_keyness_ranker(
             key=lambda i: i["item"]),
             key=lambda i: i["ranking_score_avg"], reverse=True
         )  # sort key items by 1) ranking_score_avg (descending); 2) pos_lem_or_tok (ascending)
-
         results_to_xlsx_per_sc(
-            subcorpora_sc, subcorpora_rc, name_sc, lemma_or_token, keyness_metric, frequency_type, ranking_threshold,
-            sorted_l_d_keyn, d_keyn_per_rc, maintain_subcorpora_sc, maintain_subcorpora_rc
+            subcorpora_sc, subcorpora_rc, name_sc, maintain_subcorpora_sc, maintain_subcorpora_rc, lemma_or_token,
+            frequency_type, keyness_metric, ranking_threshold, sorted_l_d_keyn, d_keyn_per_rc
         )
-
         d_keyn_overview[name_sc] = sorted_l_d_keyn
 
     d_keyn_all_scs = OrderedDict()
@@ -472,8 +447,7 @@ def init_keyness_ranker(
         key=lambda i: i["item"]),
         key=lambda i: i["ranking_score_avg_avg"], reverse=True
     )  # sort key items by 1) ranking_score_avg (descending); 2) pos_lem_or_tok (ascending)
-
     results_to_xlsx_overview(
-        subcorpora_sc, subcorpora_rc, lemma_or_token, keyness_metric, frequency_type, ranking_threshold,
-        sorted_l_d_keyn_all, d_keyn_overview, maintain_subcorpora_sc, maintain_subcorpora_rc
+        subcorpora_sc, subcorpora_rc, maintain_subcorpora_sc, maintain_subcorpora_rc, lemma_or_token, frequency_type,
+        keyness_metric, ranking_threshold, sorted_l_d_keyn_all, d_keyn_overview
     )
