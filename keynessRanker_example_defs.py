@@ -66,7 +66,7 @@ def init_keyness_ranker(
     :param frequency_type: frequency type based on which keyness values are calculated. Choose between: "abs_freq"
         (absolute frequency), "adj_freq" (adjusted frequency), "abs_freq_Lapl" (absolute frequency + Laplace smoothing),
         "adj_freq_Lapl" (adjusted frequency + Laplace smoothing). Defaults to "adj_freq_Lapl".
-    :param keyness_metric: keyness metric used to perform the keyness calculations. Choose between: "DIFF" (Gabrielatos
+    :param keyness_metric: keyness metric used to perform the keyness calculations. Choose between: "%DIFF" (Gabrielatos
         & Marchi, 2011), "Ratio" (Kilgarriff, 2009), "OddsRatio" (Everitt, 2002; Pojanapunya & Watson Todd, 2016),
         "LogRatio" (Hardie, 2014), "DiffCoefficient" (Hofland & Johansson, 1982). Defaults to "LogRatio".
     :param ranking_threshold: value between 0 and 1 which indicates in how many percent of the study corpus subcorpora -
