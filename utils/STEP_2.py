@@ -4,7 +4,7 @@ import sys
 from typing import Dict, List, Tuple
 
 
-def dp(corpus_name: str, d_freq_corpus: Dict, l_d_freq_sum_cps) -> Dict:
+def dp(corpus_name: str, d_freq_corpus: Dict, l_d_freq_sum_cps: List) -> Dict:
     """Calculate dispersion values (DPnorm).
     :param corpus_name: name of the corpus.
     :param d_freq_corpus: frequency dictionary of the entire corpus.
