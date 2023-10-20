@@ -13,8 +13,8 @@ from typing import Dict, Optional, Tuple, Union
 
 
 def init_keyness_ranker(
-        path_to_direc_sc: Union[str, pathlib.Path],
-        path_to_direc_rc: Union[str, pathlib.Path],
+        d_sc: Dict,
+        d_rc: Dict,
         *,
         input_type_sc: str = "3-column_delimited",
         input_type_rc: str = "3-column_delimited",
@@ -35,8 +35,10 @@ def init_keyness_ranker(
         encoding_3_col_del: str = "utf-8"
 ) -> None:
     """Initialise the keyness ranker.
-    :param path_to_direc_sc: path to the folder where the subcorpora of the study corpus are located.
-    :param path_to_direc_rc: path to the folder where the subcorpora of the reference corpus are located.
+    :param d_sc: dictionary containing the name of the study corpus (under the key "name") and a list of paths to the
+        folders where the subcorpora of the study corpus are located (under the key "subcorpora").
+    :param d_rc: dictionary containing the name of the reference corpus (under the key "name") and a list of paths to
+        the folders where the subcorpora of the reference corpus are located (under the key "subcorpora").
     :param input_type_sc: data type of the study corpus documents. Defaults to "3-column_delimited" for CSV/TSV files
         (which is currently also the only recognised data type).
     :param input_type_rc: data type of the reference corpus documents. Defaults to "3-column_delimited" for CSV/TSV
@@ -79,8 +81,6 @@ def init_keyness_ranker(
         "ADJ", "ADV", "INTJ", "NOUN", "PROPN", "VERB", "ADP", "AUX", "CCONJ", "DET", "NUM", "PART", "PRON", "SCONJ",
         "PUNCT", "SYM", "X"
     ]
-    subcorpora_sc = tuple([str(subcorpus) for subcorpus in os.listdir(path_to_direc_sc)])
-    subcorpora_rc = tuple([str(subcorpus) for subcorpus in os.listdir(path_to_direc_rc)])
     mapping_custom_to_ud = {pos: pos for pos in l_pos_tags_ud} if mapping_custom_to_ud is None else mapping_custom_to_ud
     mapping_ud_to_custom = {
         pos: [pos] for pos in l_pos_tags_ud
@@ -90,10 +90,10 @@ def init_keyness_ranker(
 
     d_keyn_overview = OrderedDict()
 
-    if len(subcorpora_sc) > 1:
+    if len(d_sc["subcorpora"]) > 1:
         d_keyn_per_rc = OrderedDict()
-        name_sc = str(os.path.basename(path_to_direc_sc))
-        input_sc = {corpus: os.path.join(path_to_direc_sc, corpus) for corpus in subcorpora_sc}
+        name_sc = d_sc["name"]
+        input_sc = {str(os.path.basename(path)): path for path in d_sc["subcorpora"]}
         load_from_files_sc = check_meta(
             name_sc, desired_pos, lemma_or_token, maintain_subcorpora_sc, divide_number_docs_by,
             number_iterations_merge_subcorpora
@@ -118,9 +118,9 @@ def init_keyness_ranker(
                 number_iterations_merge_subcorpora
             )
 
-        if len(subcorpora_rc) > 1:
-            name_rc = str(os.path.basename(path_to_direc_rc))
-            input_rc = {corpus: os.path.join(path_to_direc_rc, corpus) for corpus in subcorpora_rc}
+        if len(d_rc["subcorpora"]) > 1:
+            name_rc = d_rc["name"]
+            input_rc = {str(os.path.basename(path)): path for path in d_rc["subcorpora"]}
             load_from_files_rc = check_meta(
                 name_rc, desired_pos, lemma_or_token, maintain_subcorpora_rc, divide_number_docs_by,
                 number_iterations_merge_subcorpora
@@ -154,9 +154,9 @@ def init_keyness_ranker(
             )
             d_keyn_per_rc[name_rc] = l_d_keyn_corpus
 
-        for corpus in subcorpora_rc:
-            name_rc = corpus
-            input_rc = {corpus: os.path.join(path_to_direc_rc, corpus)}
+        for path_rc in d_rc["subcorpora"]:
+            name_rc = str(os.path.basename(path_rc))
+            input_rc = {name_rc: path_rc}
             load_from_files_rc = check_meta(
                 name_rc, desired_pos, lemma_or_token, maintain_subcorpora_rc, divide_number_docs_by,
                 number_iterations_merge_subcorpora
@@ -247,16 +247,15 @@ def init_keyness_ranker(
             key=lambda i: i["ranking_score_avg"], reverse=True
         )  # sort key items by 1) ranking_score_avg (descending); 2) pos_lem_or_tok (ascending)
         results_to_xlsx_per_sc(
-            name_sc, str(os.path.basename(path_to_direc_rc)), subcorpora_rc, maintain_subcorpora_sc,
-            maintain_subcorpora_rc, lemma_or_token, frequency_type, keyness_metric, ranking_threshold, sorted_l_d_keyn,
-            d_keyn_per_rc
+            name_sc, d_rc["name"], len(d_rc["subcorpora"]), maintain_subcorpora_sc, maintain_subcorpora_rc,
+            lemma_or_token, frequency_type, keyness_metric, ranking_threshold, sorted_l_d_keyn, d_keyn_per_rc
         )
         d_keyn_overview[name_sc] = sorted_l_d_keyn
 
-    for study_corpus in subcorpora_sc:
-        name_sc = study_corpus
+    for path_sc in d_sc["subcorpora"]:
+        name_sc = str(os.path.basename(path_sc))
         d_keyn_per_rc = OrderedDict()
-        input_sc = {study_corpus: os.path.join(path_to_direc_sc, study_corpus)}
+        input_sc = {name_sc: path_sc}
         load_from_files_sc = check_meta(
             name_sc, desired_pos, lemma_or_token, maintain_subcorpora_sc, divide_number_docs_by,
             number_iterations_merge_subcorpora
@@ -281,9 +280,9 @@ def init_keyness_ranker(
                 number_iterations_merge_subcorpora
             )
 
-        if len(subcorpora_rc) > 1:
-            name_rc = str(os.path.basename(path_to_direc_rc))
-            input_rc = {corpus: os.path.join(path_to_direc_rc, corpus) for corpus in subcorpora_rc}
+        if len(d_rc["subcorpora"]) > 1:
+            name_rc = d_rc["name"]
+            input_rc = {str(os.path.basename(path)): path for path in d_rc["subcorpora"]}
             load_from_files_rc = check_meta(
                 name_rc, desired_pos, lemma_or_token, maintain_subcorpora_rc, divide_number_docs_by,
                 number_iterations_merge_subcorpora
@@ -317,9 +316,9 @@ def init_keyness_ranker(
             )
             d_keyn_per_rc[name_rc] = l_d_keyn_corpus
 
-        for corpus in subcorpora_rc:
-            name_rc = corpus
-            input_rc = {corpus: os.path.join(path_to_direc_rc, corpus)}
+        for path_rc in d_rc["subcorpora"]:
+            name_rc = str(os.path.basename(path_rc))
+            input_rc = {name_rc: path_rc}
             load_from_files_rc = check_meta(
                 name_rc, desired_pos, lemma_or_token, maintain_subcorpora_rc, divide_number_docs_by,
                 number_iterations_merge_subcorpora
@@ -410,9 +409,8 @@ def init_keyness_ranker(
             key=lambda i: i["ranking_score_avg"], reverse=True
         )  # sort key items by 1) ranking_score_avg (descending); 2) pos_lem_or_tok (ascending)
         results_to_xlsx_per_sc(
-            name_sc, str(os.path.basename(path_to_direc_rc)), subcorpora_rc, maintain_subcorpora_sc,
-            maintain_subcorpora_rc, lemma_or_token, frequency_type, keyness_metric, ranking_threshold, sorted_l_d_keyn,
-            d_keyn_per_rc
+            name_sc, d_rc["name"], len(d_rc["subcorpora"]), maintain_subcorpora_sc, maintain_subcorpora_rc,
+            lemma_or_token, frequency_type, keyness_metric, ranking_threshold, sorted_l_d_keyn, d_keyn_per_rc
         )
         d_keyn_overview[name_sc] = sorted_l_d_keyn
 
@@ -459,7 +457,6 @@ def init_keyness_ranker(
         key=lambda i: i["ranking_score_avg_avg"], reverse=True
     )  # sort key items by 1) ranking_score_avg (descending); 2) pos_lem_or_tok (ascending)
     results_to_xlsx_overview(
-        str(os.path.basename(path_to_direc_sc)), str(os.path.basename(path_to_direc_rc)), subcorpora_sc,
-        maintain_subcorpora_sc, maintain_subcorpora_rc, lemma_or_token, frequency_type, keyness_metric,
-        ranking_threshold, sorted_l_d_keyn_all, d_keyn_overview
+        d_sc["name"], d_rc["name"], len(d_sc["subcorpora"]), maintain_subcorpora_sc, maintain_subcorpora_rc,
+        lemma_or_token, frequency_type, keyness_metric, ranking_threshold, sorted_l_d_keyn_all, d_keyn_overview
     )

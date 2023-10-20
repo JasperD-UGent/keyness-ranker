@@ -8,7 +8,7 @@ import xlsxwriter
 def results_to_xlsx_per_sc(
         name_sc: str,
         name_rc: str,
-        tup_corpora_rc: Tuple,
+        n_rc_prov: int,
         maintain_subcorpora_sc: bool,
         maintain_subcorpora_rc: bool,
         lem_or_tok: str,
@@ -21,7 +21,7 @@ def results_to_xlsx_per_sc(
     """Write results to XLSX (per study corpus).
     :param name_sc: name of the study corpus.
     :param name_rc: name of the reference corpus.
-    :param tup_corpora_rc: tuple of subcorpora in the reference corpus.
+    :param n_rc_prov: number of subcorpora in the reference corpus.
     :param maintain_subcorpora_sc: when working with adjusted frequencies, boolean value which defines whether
         dispersion is based on existing subcorpora of the study corpus, or whether all documents are merged and randomly
         split into new subcorpora.
@@ -42,10 +42,10 @@ def results_to_xlsx_per_sc(
     output_direc = f"{name_sc}_VS_{name_rc}"
     fn_keyn = f"{name_sc}_VS_{name_rc}_keyness_ranked_{keyn_metric}_{freq_type}"
 
-    if len(tup_corpora_rc) == 1:
+    if n_rc_prov == 1:
         n_rc = 1
     else:
-        n_rc = len(tup_corpora_rc) + 1
+        n_rc = n_rc_prov + 1
 
     n_rankings_thresh = n_rc * ranking_thresh
 
@@ -177,7 +177,7 @@ def results_to_xlsx_per_sc(
 def results_to_xlsx_overview(
         name_sc: str,
         name_rc: str,
-        tup_corpora_sc: Tuple,
+        n_sc_prov: int,
         maintain_subcorpora_sc: bool,
         maintain_subcorpora_rc: bool,
         lem_or_tok: str,
@@ -190,7 +190,7 @@ def results_to_xlsx_overview(
     """Write results to XLSX (overview).
     :param name_sc: name of the study corpus.
     :param name_rc: name of the reference corpus.
-    :param tup_corpora_sc: tuple of subcorpora in the study corpus.
+    :param n_sc_prov: number of subcorpora in the study corpus.
     :param maintain_subcorpora_sc: when working with adjusted frequencies, boolean value which defines whether
         dispersion is based on existing subcorpora of the study corpus, or whether all documents are merged and randomly
         split into new subcorpora.
@@ -210,10 +210,10 @@ def results_to_xlsx_overview(
     output_direc = f"{name_sc}_VS_{name_rc}"
     fn_keyn = f"{name_sc}_VS_{name_rc}_keyness_ranked_overview_{keyn_metric}_{freq_type}"
 
-    if len(tup_corpora_sc) == 1:
+    if n_sc_prov == 1:
         n_sc = 1
     else:
-        n_sc = len(tup_corpora_sc) + 1
+        n_sc = n_sc_prov + 1
 
     n_rankings_thresh = n_sc * ranking_thresh
 

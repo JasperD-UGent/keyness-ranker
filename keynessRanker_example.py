@@ -2,7 +2,6 @@ from keynessRanker_example_defs import init_keyness_ranker
 import numpy as np
 import os
 import random
-import sys
 
 
 seed = 42
@@ -11,12 +10,27 @@ random.seed(seed)
 
 
 def main():
-    path_to_direc_sc = os.path.join("exampleCorpora", "UD_Spanish-GSD")
-    path_to_direc_rc = os.path.join("exampleCorpora", "UD_Spanish-AnCora")
+    # define support variables
+    path_to_direc_corpora = os.path.join("exampleCorpora")
+    name_sc = "UD_Spanish-GSD"
+    name_rc = "UD_Spanish-AnCora"
 
+    # define variables to be passed into function
+    d_sc = {
+        "name": name_sc,
+        "subcorpora": [os.path.join(path_to_direc_corpora, name_sc, "GSD_subcorpus1"),
+                       os.path.join(path_to_direc_corpora, name_sc, "GSD_subcorpus2")]
+    }
+    d_rc = {
+        "name": name_rc,
+        "subcorpora": [os.path.join(path_to_direc_corpora, name_rc, "AnCora_subcorpus1"),
+                       os.path.join(path_to_direc_corpora, name_rc, "AnCora_subcorpus3")]
+    }
+
+    # call function
     init_keyness_ranker(
-        path_to_direc_sc,
-        path_to_direc_rc
+        d_sc,
+        d_rc
     )
 
 
