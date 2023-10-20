@@ -21,8 +21,8 @@ def check_meta(
         values (and rankings), which are averaged out in the end.
     :return: `True` if corresponds, `False` if not.
     """
-    div_n_docs_by = div_n_docs_by if maintain_subcorpora else None
-    n_iters = n_iters if maintain_subcorpora else None
+    div_n_docs_by = div_n_docs_by if not maintain_subcorpora else None
+    n_iters = n_iters if not maintain_subcorpora else None
 
     if os.path.exists(os.path.join("prep", corpus_name, f"{corpus_name}_meta.json")):
         d_meta_corpus = load_json(os.path.join("prep", corpus_name, f"{corpus_name}_meta.json"))
