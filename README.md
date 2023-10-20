@@ -11,7 +11,7 @@ The usage example is presented in the <code>keynessRanker_example.py</code> file
 def main():
     path_to_direc_sc = os.path.join("exampleCorpora", "UD_Spanish-GSD")
     path_to_direc_rc = os.path.join("exampleCorpora", "UD_Spanish-AnCora")
-    
+
     init_keyness_ranker(
         path_to_direc_sc,
         path_to_direc_rc
