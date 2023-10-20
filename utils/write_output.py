@@ -6,9 +6,9 @@ import xlsxwriter
 
 
 def results_to_xlsx_per_sc(
-        tup_corpora_sc: Tuple,
+        name_sc: str,
+        name_rc: str,
         tup_corpora_rc: Tuple,
-        corpus_name_sc: str,
         maintain_subcorpora_sc: bool,
         maintain_subcorpora_rc: bool,
         lem_or_tok: str,
@@ -19,9 +19,9 @@ def results_to_xlsx_per_sc(
         d_keyn_per_corpus: Dict,
 ) -> None:
     """Write results to XLSX (per study corpus).
-    :param tup_corpora_sc: tuple of subcorpora in the study corpus.
+    :param name_sc: name of the study corpus.
+    :param name_rc: name of the reference corpus.
     :param tup_corpora_rc: tuple of subcorpora in the reference corpus.
-    :param corpus_name_sc: name of the study corpus.
     :param maintain_subcorpora_sc: when working with adjusted frequencies, boolean value which defines whether
         dispersion is based on existing subcorpora of the study corpus, or whether all documents are merged and randomly
         split into new subcorpora.
@@ -39,8 +39,8 @@ def results_to_xlsx_per_sc(
         ranking information per reference corpus.
     :return: `None`
     """
-    output_direc = f"{'_'.join(tup_corpora_sc)}_VS_{'_'.join(tup_corpora_rc)}"
-    fn_keyn = f"{corpus_name_sc}_VS_{'_'.join(tup_corpora_rc)}_keyness_ranked_{keyn_metric}_{freq_type}"
+    output_direc = f"{name_sc}_VS_{name_rc}"
+    fn_keyn = f"{name_sc}_VS_{name_rc}_keyness_ranked_{keyn_metric}_{freq_type}"
 
     if len(tup_corpora_rc) == 1:
         n_rc = 1
@@ -163,11 +163,11 @@ def results_to_xlsx_per_sc(
             row_ws_3_and_4 += 1
 
     ws5.write(0, 0, "name_sc")
-    ws5.write(0, 1, corpus_name_sc)
+    ws5.write(0, 1, name_sc)
     ws5.write(1, 0, "maintain_subcorpora_sc")
     ws5.write(1, 1, maintain_subcorpora_sc)
     ws5.write(2, 0, "name_rc")
-    ws5.write(2, 1, "_".join(tup_corpora_rc))
+    ws5.write(2, 1, name_rc)
     ws5.write(3, 0, "maintain_subcorpora_rc")
     ws5.write(3, 1, maintain_subcorpora_rc)
 
@@ -175,8 +175,9 @@ def results_to_xlsx_per_sc(
 
 
 def results_to_xlsx_overview(
+        name_sc: str,
+        name_rc: str,
         tup_corpora_sc: Tuple,
-        tup_corpora_rc: Tuple,
         maintain_subcorpora_sc: bool,
         maintain_subcorpora_rc: bool,
         lem_or_tok: str,
@@ -187,8 +188,9 @@ def results_to_xlsx_overview(
         d_keyn_overview: Dict,
 ):
     """Write results to XLSX (overview).
+    :param name_sc: name of the study corpus.
+    :param name_rc: name of the reference corpus.
     :param tup_corpora_sc: tuple of subcorpora in the study corpus.
-    :param tup_corpora_rc: tuple of subcorpora in the reference corpus.
     :param maintain_subcorpora_sc: when working with adjusted frequencies, boolean value which defines whether
         dispersion is based on existing subcorpora of the study corpus, or whether all documents are merged and randomly
         split into new subcorpora.
@@ -205,9 +207,8 @@ def results_to_xlsx_overview(
     :param d_keyn_overview: dictionary containing the overall results per study corpus.
     :return: `None`
     """
-    output_direc = f"{'_'.join(tup_corpora_sc)}_VS_{'_'.join(tup_corpora_rc)}"
-    fn_keyn = \
-        f"{'_'.join(tup_corpora_sc)}_VS_{'_'.join(tup_corpora_rc)}_keyness_ranked_overview_{keyn_metric}_{freq_type}"
+    output_direc = f"{name_sc}_VS_{name_rc}"
+    fn_keyn = f"{name_sc}_VS_{name_rc}_keyness_ranked_overview_{keyn_metric}_{freq_type}"
 
     if len(tup_corpora_sc) == 1:
         n_sc = 1
@@ -281,11 +282,11 @@ def results_to_xlsx_overview(
             row_ws2 += 1
 
     ws3.write(0, 0, "name_SC")
-    ws3.write(0, 1, "_".join(tup_corpora_sc))
+    ws3.write(0, 1, name_sc)
     ws3.write(1, 0, "maintain_subcorpora_SC")
     ws3.write(1, 1, maintain_subcorpora_sc)
     ws3.write(2, 0, "name_RC")
-    ws3.write(2, 1, "_".join(tup_corpora_rc))
+    ws3.write(2, 1, name_rc)
     ws3.write(3, 0, "maintain_subcorpora_RC")
     ws3.write(3, 1, maintain_subcorpora_rc)
 
