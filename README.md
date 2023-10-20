@@ -25,7 +25,7 @@ The output of intermediary steps (frequency dictionaries \[per item and totals] 
 
 ## Method
 ### Step_1
-Convert corpora into frequency dictionaries (per item and totals) (see [keyness-calculator](https://github.com/JasperD-UGent/keyness-calculator)).
+Convert corpora into frequency dictionaries (see [keyness-calculator](https://github.com/JasperD-UGent/keyness-calculator)).
 
 ### Step_2
 Apply dispersion metric, calculate adjusted frequencies and update frequency dictionaries (see [keyness-calculator](https://github.com/JasperD-UGent/keyness-calculator)).
